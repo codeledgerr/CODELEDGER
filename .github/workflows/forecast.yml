@@ -1,0 +1,73 @@
+name: TWO PATHS forecast
+
+# Submits a Code Ledger forecast whenever none is active. Every run re-reads the chain, so a late,
+# skipped or duplicated schedule tick is harmless: if a vote or a 32-swap prediction is active, the
+# run stops successfully without sending anything.
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Compute and print the forecast without sending a transaction
+        type: boolean
+        default: false
+
+# write: only to commit the live stats in README.md (git push with GITHUB_TOKEN).
+permissions:
+  contents: write
+
+# Never two runs at once: they would race to submit the same forecast.
+concurrency:
+  group: forecast
+  cancel-in-progress: false
+
+jobs:
+  forecast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci --ignore-scripts
+
+      - name: Test forecast algorithm
+        run: npm test
+
+      - name: Submit forecast
+        run: node forecast/main.mjs
+        env:
+          CODE_LEDGER_CONTRACT: ${{ vars.CODE_LEDGER_CONTRACT }}
+          REWARDS_CONTRACT: ${{ vars.REWARDS_CONTRACT }}
+          VOTING_CONTRACT: ${{ vars.VOTING_CONTRACT }}
+          DEPLOY_BLOCK: ${{ vars.DEPLOY_BLOCK }}
+          FORECAST_SIGNER_PRIVATE_KEY: ${{ secrets.FORECAST_SIGNER_PRIVATE_KEY }}
+          DRY_RUN: ${{ inputs.dry_run == true }}
+
+      # Display only: reads the contracts and refreshes the stats block. Runs even if the forecast
+      # step failed, and never fails the job itself.
+      - name: Update README stats
+        if: ${{ !cancelled() }}
+        run: node forecast/readme.mjs
+        env:
+          CODE_LEDGER_CONTRACT: ${{ vars.CODE_LEDGER_CONTRACT }}
+          REWARDS_CONTRACT: ${{ vars.REWARDS_CONTRACT }}
+          VOTING_CONTRACT: ${{ vars.VOTING_CONTRACT }}
+          DEPLOY_BLOCK: ${{ vars.DEPLOY_BLOCK }}
+
+      - name: Commit README stats
+        if: ${{ !cancelled() && inputs.dry_run != true }}
+        run: |
+          git diff --quiet README.md && { echo "stats unchanged"; exit 0; }
+          git config user.name "code-ledger-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "stats: update live README [skip ci]"
+          git pull --rebase --autostash
+          git push

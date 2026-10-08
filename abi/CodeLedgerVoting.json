@@ -1,0 +1,501 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "ledger_",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "forecastSigner_",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "CODE_LEDGER",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract ICodeLedgerRuns"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "FORECAST_SIGNER",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "MAX_REFERENCE_DRIFT",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "int24",
+        "internalType": "int24"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "VOTING_WINDOW",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "ballotOf",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint8",
+        "internalType": "enum Path"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "canPush",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "castVote",
+    "inputs": [
+      {
+        "name": "id",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "path",
+        "type": "uint8",
+        "internalType": "enum Path"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "forecastOf",
+    "inputs": [
+      {
+        "name": "id",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct CodeLedgerVoting.Forecast",
+        "components": [
+          {
+            "name": "referenceTick",
+            "type": "int24",
+            "internalType": "int24"
+          },
+          {
+            "name": "upTargetTick",
+            "type": "int24",
+            "internalType": "int24"
+          },
+          {
+            "name": "downTargetTick",
+            "type": "int24",
+            "internalType": "int24"
+          },
+          {
+            "name": "codeChoice",
+            "type": "uint8",
+            "internalType": "enum Path"
+          },
+          {
+            "name": "mergedPath",
+            "type": "uint8",
+            "internalType": "enum Path"
+          },
+          {
+            "name": "voteOpensAt",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "voteClosesAt",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "upWeight",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "downWeight",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "forecastSummary",
+    "inputs": [
+      {
+        "name": "id",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "currentStage",
+        "type": "uint8",
+        "internalType": "enum CodeLedgerVoting.Stage"
+      },
+      {
+        "name": "mergedPath",
+        "type": "uint8",
+        "internalType": "enum Path"
+      },
+      {
+        "name": "targetTick",
+        "type": "int24",
+        "internalType": "int24"
+      },
+      {
+        "name": "swapsPassed",
+        "type": "uint8",
+        "internalType": "uint8"
+      },
+      {
+        "name": "hit",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "hitAtSwap",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "latestForecastId",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "merge",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "mergedPath",
+        "type": "uint8",
+        "internalType": "enum Path"
+      },
+      {
+        "name": "targetTick",
+        "type": "int24",
+        "internalType": "int24"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "pushForecast",
+    "inputs": [
+      {
+        "name": "referenceTick",
+        "type": "int24",
+        "internalType": "int24"
+      },
+      {
+        "name": "upTargetTick",
+        "type": "int24",
+        "internalType": "int24"
+      },
+      {
+        "name": "downTargetTick",
+        "type": "int24",
+        "internalType": "int24"
+      },
+      {
+        "name": "codeChoice",
+        "type": "uint8",
+        "internalType": "enum Path"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "id",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "stageOf",
+    "inputs": [
+      {
+        "name": "id",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint8",
+        "internalType": "enum CodeLedgerVoting.Stage"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "BallotCast",
+    "inputs": [
+      {
+        "name": "id",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "voter",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "path",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "enum Path"
+      },
+      {
+        "name": "weight",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ForecastMerged",
+    "inputs": [
+      {
+        "name": "id",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "mergedPath",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "enum Path"
+      },
+      {
+        "name": "targetTick",
+        "type": "int24",
+        "indexed": false,
+        "internalType": "int24"
+      },
+      {
+        "name": "upWeight",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "downWeight",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "byCodeChoice",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ForecastPushed",
+    "inputs": [
+      {
+        "name": "id",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "referenceTick",
+        "type": "int24",
+        "indexed": false,
+        "internalType": "int24"
+      },
+      {
+        "name": "upTargetTick",
+        "type": "int24",
+        "indexed": false,
+        "internalType": "int24"
+      },
+      {
+        "name": "downTargetTick",
+        "type": "int24",
+        "indexed": false,
+        "internalType": "int24"
+      },
+      {
+        "name": "codeChoice",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "enum Path"
+      },
+      {
+        "name": "voteClosesAt",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "AlreadyCast",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "BadPath",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "BadTargetTicks",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NothingToMerge",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OnlyForecastSigner",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "PreviousForecastOpen",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ReferenceTooFar",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "StaleForecastId",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "TargetAlreadyReached",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "VotingOver",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "VotingStillOpen",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroAddressGiven",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroWeight",
+    "inputs": []
+  }
+]
