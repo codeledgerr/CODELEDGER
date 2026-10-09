@@ -22,6 +22,9 @@ import { loadSigner, submitForecast } from './submit.mjs';
 /** Blocks behind the head the data is read at, so a shallow reorg cannot change it. */
 const CONFIRMATIONS = 2n;
 
+/** pushForecast attempts per run when the price outruns MAX_REFERENCE_DRIFT while a transaction is pending. */
+const SUBMIT_ATTEMPTS = 3;
+
 class ConfigError extends Error {}
 
 /** Stops the run successfully without a transaction. */
@@ -139,33 +142,45 @@ async function main() {
     ].join('\n'),
   );
 
-  // ── 6. Anchor to the LIVE tick and validate, right before sending. ───────────────────────────
+  // ── 6–7. Anchor to the LIVE tick, validate, submit, confirm. ──────────────────────────────────
   // Direction and distance come from the pinned-block data; the reference and targets move to the
   // live price, so a fast market between the pinned block and now cannot make the reference stale.
-  const live = await withFallback(rpcs, 'live state', async (c) => {
-    const [canPush, priceTick] = await Promise.all([
-      c.readContract({ ...board, functionName: 'canPush' }),
-      c.readContract({ ...ledger, functionName: 'currentPriceTick' }),
-    ]);
-    return { canPush, priceTick };
-  });
-  if (!live.canPush) throw new Skip('a forecast was opened meanwhile');
-  const forecast = anchorForecast(computed, live.priceTick);
-  if (live.priceTick !== computed.referenceTick) {
-    console.log(`live price tick ${live.priceTick} (pinned ${computed.referenceTick}): targets re-anchored to the live price`);
-  }
-  const problems = validateForecast(forecast, { livePriceTick: live.priceTick, maxReferenceDrift: wiring.maxDrift });
-  if (problems.length) throw new Skip(`forecast rejected: ${problems.join('; ')}`);
+  // If the price still moves past MAX_REFERENCE_DRIFT (or onto a target) while the transaction
+  // waits for its block, the contract reverts it (cheap: it fails on the first checks). Then the
+  // live price is read again and the forecast re-anchored, up to SUBMIT_ATTEMPTS times.
+  let result;
+  for (let attempt = 1; ; attempt++) {
+    const live = await readLive(rpcs, board, ledger);
+    if (!live.canPush) throw new Skip('a forecast was opened meanwhile');
+    const forecast = anchorForecast(computed, live.priceTick);
+    if (live.priceTick !== computed.referenceTick) {
+      console.log(`live price tick ${live.priceTick} (pinned ${computed.referenceTick}): targets re-anchored to the live price`);
+    }
+    const problems = validateForecast(forecast, { livePriceTick: live.priceTick, maxReferenceDrift: wiring.maxDrift });
+    if (problems.length) throw new Skip(`forecast rejected: ${problems.join('; ')}`);
 
-  printForecast('forecast', { id: state.latestId + 1n, ...forecast });
-  if (dryRun) {
-    summary(`Dry run at block ${blockNumber}: nothing sent.`, { id: state.latestId + 1n, ...forecast });
-    return;
-  }
+    printForecast(attempt === 1 ? 'forecast' : `forecast (attempt ${attempt}/${SUBMIT_ATTEMPTS})`, { id: state.latestId + 1n, ...forecast });
+    if (dryRun) {
+      summary(`Dry run at block ${blockNumber}: nothing sent.`, { id: state.latestId + 1n, ...forecast });
+      return;
+    }
 
-  // ── 7. Submit and confirm. ───────────────────────────────────────────────────────────────────
-  const result = await submitForecast(rpcs, { account, voting: config.voting, forecast });
-  if (result.skipped) throw new Skip(result.skipped);
+    result = await submitForecast(rpcs, { account, voting: config.voting, forecast });
+    if (result.skipped) throw new Skip(result.skipped);
+    if (!result.reverted) break;
+
+    // Reverted onchain. Only a market move is retried; anything else needs a human.
+    const tickAfter = await withFallback(rpcs, 'price after revert', (c) =>
+      c.readContract({ ...ledger, functionName: 'currentPriceTick', blockNumber: result.receipt.blockNumber }),
+    );
+    const drift = Math.abs(forecast.referenceTick - tickAfter);
+    const marketMoved = drift > wiring.maxDrift || tickAfter >= forecast.upTargetTick || tickAfter <= forecast.downTargetTick;
+    if (!marketMoved) throw new Error(`transaction ${result.reverted} reverted onchain`);
+    console.log(`transaction ${result.reverted} reverted: the price moved ${drift} ticks while it was pending (limit ${wiring.maxDrift})`);
+    if (attempt >= SUBMIT_ATTEMPTS) {
+      throw new Skip(`the price moved faster than MAX_REFERENCE_DRIFT on ${SUBMIT_ATTEMPTS} attempts; retrying next run`);
+    }
+  }
 
   const p = result.pushed;
   const submitted = {
@@ -178,6 +193,17 @@ async function main() {
   };
   printForecast(`forecast submitted in block ${result.receipt.blockNumber}`, submitted);
   summary('Forecast submitted.', submitted);
+}
+
+/** canPush and the price tick at the head block, read right before sending. */
+function readLive(rpcs, board, ledger) {
+  return withFallback(rpcs, 'live state', async (c) => {
+    const [canPush, priceTick] = await Promise.all([
+      c.readContract({ ...board, functionName: 'canPush' }),
+      c.readContract({ ...ledger, functionName: 'currentPriceTick' }),
+    ]);
+    return { canPush, priceTick };
+  });
 }
 
 const bps = (v) => `${v >= 0 ? '+' : ''}${(v / 10_000).toFixed(4)}`;

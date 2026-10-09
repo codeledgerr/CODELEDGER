@@ -8,6 +8,10 @@
   <b>Two paths. One pick by the code. One vote by the holders. 32 trades to prove it.</b>
 </p>
 
+<p align="center">
+  <a href="https://x.com/codeledgr">X: @codeledgr</a>
+</p>
+
 ---
 
 ## 📈 Live stats

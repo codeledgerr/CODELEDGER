@@ -33,7 +33,8 @@ function revertName(e) {
 
 /**
  * Simulates, signs, broadcasts and confirms pushForecast.
- * Returns { skipped: reason } when nothing was sent, otherwise { hash, receipt, forecastId }.
+ * Returns { skipped: reason } when nothing was sent, { reverted: hash, receipt } when the
+ * transaction was mined but reverted, otherwise { hash, receipt, forecastId, pushed }.
  */
 export async function submitForecast(rpcs, { account, voting, forecast }) {
   const args = [forecast.referenceTick, forecast.upTargetTick, forecast.downTargetTick, forecast.codeChoice];
@@ -85,7 +86,7 @@ export async function submitForecast(rpcs, { account, voting, forecast }) {
   const receipt = await withFallback(rpcs, 'wait for receipt', (c) =>
     c.waitForTransactionReceipt({ hash, timeout: RECEIPT_TIMEOUT_MS }),
   );
-  if (receipt.status !== 'success') throw new Error(`transaction ${hash} reverted onchain`);
+  if (receipt.status !== 'success') return { reverted: hash, receipt };
 
   const votingLogs = receipt.logs.filter((l) => l.address.toLowerCase() === voting.toLowerCase());
   const [pushed] = parseEventLogs({ abi: votingAbi, eventName: 'ForecastPushed', logs: votingLogs });
