@@ -19,9 +19,9 @@
 <sub>Updated automatically from the blockchain every few minutes.</sub>
 
 <!-- STATS:START -->
-**Price now:** 1 CLEDGER ≈ 0.00000002277 ETH
+**Price now:** 1 CLEDGER ≈ 0.00000001579 ETH
 
-### 📒 Round #3 — 🏃 Prediction in play
+### 📒 Round #3 — ✅ Finished, next round coming soon
 
 | | |
 |---|---|
@@ -30,25 +30,26 @@
 | ⬇️ DOWN target | 0.00000001503 ETH (-9.14%) |
 | 🗳️ Community vote | no votes, the code pick was used |
 | 🛤️ Path in play | ⬇️ DOWN |
-| 📈 Progress | ▰▰▰▱▱▱▱▱▱▱▱▱▱▱▱▱ 6 / 32 trades |
+| 📈 Progress | ▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰ 32 / 32 trades |
+| ❌ Result | MISS: the target was not reached |
 
 ### 🏆 Scoreboard
 
 | Rounds finished | 🎯 Hits | ❌ Misses | Hit rate |
 |:---:|:---:|:---:|:---:|
-| 2 | 2 | 0 | 100% |
+| 3 | 2 | 1 | 67% |
 
 ### 💸 Fees shared in ETH
 
 | 👥 To holders | 🛠️ To development | ✅ Already claimed |
 |:---:|:---:|:---:|
-| 1.0617 ETH | 0.3165 ETH | 0.0275 ETH |
+| 1.1171 ETH | 0.3350 ETH | 0.0325 ETH |
 
 ### 📜 Latest rounds
 
 | Round | 🐱 Code | 🗳️ Community | 🛤️ Played | Result |
 |:---:|:---:|:---:|:---:|:---:|
-| #3 | ⬇️ DOWN | tie / no votes | ⬇️ DOWN | … |
+| #3 | ⬇️ DOWN | tie / no votes | ⬇️ DOWN | ❌ MISS |
 | #2 | ⬇️ DOWN | ⬆️ UP | ⬆️ UP | 🎯 HIT on trade 1 |
 | #1 | ⬆️ UP | tie / no votes | ⬆️ UP | 🎯 HIT on trade 1 |
 <!-- STATS:END -->
