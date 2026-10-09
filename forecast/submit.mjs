@@ -12,6 +12,12 @@ import { withFallback } from './rpc.mjs';
 
 /** Extra gas on top of the estimate, in percent. */
 const GAS_BUFFER_PERCENT = 20n;
+/**
+ * Minimum priority fee (tip). Public RPCs often suggest 0, and a zero-tip transaction is mined last
+ * or minutes late — long enough for a fast market to move past MAX_REFERENCE_DRIFT. 1.5 gwei gets it
+ * into the next block; at ~37k–150k gas that is a fraction of a cent to a few cents.
+ */
+const MIN_PRIORITY_FEE = 1_500_000_000n;
 const RECEIPT_TIMEOUT_MS = 10 * 60_000;
 
 /** Loads the signer from the secret. The error message never contains the key. */
@@ -68,7 +74,10 @@ export async function submitForecast(rpcs, { account, voting, forecast }) {
       data: encodeFunctionData({ abi: votingAbi, functionName: 'pushForecast', args }),
       nonce: confirmedNonce,
     });
-    return { ...req, gas: (req.gas * (100n + GAS_BUFFER_PERCENT)) / 100n };
+    const tip = req.maxPriorityFeePerGas > MIN_PRIORITY_FEE ? req.maxPriorityFeePerGas : MIN_PRIORITY_FEE;
+    // maxFeePerGas from viem already covers ~2x the base fee; keep that headroom on top of the tip.
+    const maxFee = req.maxFeePerGas - req.maxPriorityFeePerGas + tip;
+    return { ...req, maxPriorityFeePerGas: tip, maxFeePerGas: maxFee, gas: (req.gas * (100n + GAS_BUFFER_PERCENT)) / 100n };
   });
   const serializedTransaction = await account.signTransaction(request);
   const hash = keccak256(serializedTransaction);
