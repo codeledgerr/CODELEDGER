@@ -2,6 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  anchorForecast,
   classifySwap,
   computeForecast,
   MAX_TARGET_DISTANCE,
@@ -130,4 +131,14 @@ test('validation rejects bad targets', () => {
   assert.ok(validateForecast(ok, { ...ctx, livePriceTick: 170 }).length); // UP already reached
   assert.ok(validateForecast(ok, { ...ctx, livePriceTick: 100 + 201 }).length);
   assert.ok(validateForecast({ referenceTick: 887_000, upTargetTick: 887_300, downTargetTick: 886_700, codeChoice: 1 }, { livePriceTick: 887_000, maxReferenceDrift: 200 }).length);
+});
+
+test('anchorForecast moves reference and targets to the live tick, keeping distance and choice', () => {
+  const f = { referenceTick: -1000, upTargetTick: -940, downTargetTick: -1060, codeChoice: Path.DOWN, details: {} };
+  const a = anchorForecast(f, -1250);
+  assert.equal(a.referenceTick, -1250);
+  assert.equal(a.upTargetTick, -1190);
+  assert.equal(a.downTargetTick, -1310);
+  assert.equal(a.codeChoice, Path.DOWN);
+  assert.deepEqual(validateForecast(a, { livePriceTick: -1250, maxReferenceDrift: 200 }), []);
 });

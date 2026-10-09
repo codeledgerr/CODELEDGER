@@ -16,7 +16,7 @@
 import { appendFileSync } from 'node:fs';
 import { codeLedgerAbi, readConfig, Stage, stageName, votingAbi } from './contracts.mjs';
 import { connect, crossChecked, fetchRecentSwaps, RpcUnavailableError, withFallback } from './rpc.mjs';
-import { classifySwap, computeForecast, pathName, SAMPLE_SWAPS, toPriceTick, validateForecast } from './algorithm.mjs';
+import { anchorForecast, classifySwap, computeForecast, pathName, SAMPLE_SWAPS, toPriceTick, validateForecast } from './algorithm.mjs';
 import { loadSigner, submitForecast } from './submit.mjs';
 
 /** Blocks behind the head the data is read at, so a shallow reorg cannot change it. */
@@ -121,25 +121,27 @@ async function main() {
   }
 
   // ── 5. Forecast. ─────────────────────────────────────────────────────────────────────────────
-  const forecast = computeForecast({
+  const computed = computeForecast({
     startTick: toPriceTick(before.args.tick, cledgerIsCurrency0),
     swaps,
     currentPriceTick: state.priceTick,
     blockHash,
   });
-  const d = forecast.details;
+  const d = computed.details;
   console.log(
     [
       `sample: swaps in blocks ${sample[0].blockNumber}-${sample.at(-1).blockNumber}`,
       `long momentum  ${bps(d.longMomentum)}`,
       `buy/sell       ${bps(d.pressure)}  (buy ${eth(d.buyVolume)} ETH, sell ${eth(d.sellVolume)} ETH)`,
       `short momentum ${bps(d.shortMomentum)}`,
-      `score          ${bps(d.score)}  -> ${pathName(forecast.codeChoice)} by ${d.decidedBy}`,
+      `score          ${bps(d.score)}  -> ${pathName(computed.codeChoice)} by ${d.decidedBy}`,
       `volatility     ${d.averageAbsTickMove.toFixed(2)} ticks/swap -> target distance ${d.targetDistance}`,
     ].join('\n'),
   );
 
-  // ── 6. Validate against the LIVE tick, right before sending. ─────────────────────────────────
+  // ── 6. Anchor to the LIVE tick and validate, right before sending. ───────────────────────────
+  // Direction and distance come from the pinned-block data; the reference and targets move to the
+  // live price, so a fast market between the pinned block and now cannot make the reference stale.
   const live = await withFallback(rpcs, 'live state', async (c) => {
     const [canPush, priceTick] = await Promise.all([
       c.readContract({ ...board, functionName: 'canPush' }),
@@ -148,6 +150,10 @@ async function main() {
     return { canPush, priceTick };
   });
   if (!live.canPush) throw new Skip('a forecast was opened meanwhile');
+  const forecast = anchorForecast(computed, live.priceTick);
+  if (live.priceTick !== computed.referenceTick) {
+    console.log(`live price tick ${live.priceTick} (pinned ${computed.referenceTick}): targets re-anchored to the live price`);
+  }
   const problems = validateForecast(forecast, { livePriceTick: live.priceTick, maxReferenceDrift: wiring.maxDrift });
   if (problems.length) throw new Skip(`forecast rejected: ${problems.join('; ')}`);
 

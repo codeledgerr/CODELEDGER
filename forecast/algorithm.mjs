@@ -161,6 +161,22 @@ export function computeForecast({ startTick, swaps, currentPriceTick, blockHash 
 }
 
 /**
+ * Re-anchors a forecast to a newer live price tick: same CODE CHOICE, same target distance, the
+ * reference and both targets shifted to `livePriceTick`. Direction and distance come from the
+ * sampled swaps; only the anchor moves, so a fast market between the pinned block and submission
+ * does not push the reference past MAX_REFERENCE_DRIFT.
+ */
+export function anchorForecast(f, livePriceTick) {
+  const distance = f.upTargetTick - f.referenceTick;
+  return {
+    ...f,
+    referenceTick: livePriceTick,
+    upTargetTick: livePriceTick + distance,
+    downTargetTick: livePriceTick - distance,
+  };
+}
+
+/**
  * Validates a forecast against the rules CodeLedgerVoting.pushForecast enforces plus this
  * algorithm's own bounds. Returns a list of problems; empty means valid.
  */
