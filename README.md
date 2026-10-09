@@ -19,7 +19,7 @@
 <sub>Updated automatically from the blockchain every few minutes.</sub>
 
 <!-- STATS:START -->
-**Price now:** 1 CLEDGER ≈ 0.000000007437 ETH
+**Price now:** 1 CLEDGER ≈ 0.000000008095 ETH
 
 ### 📒 Round #6 — 🏃 Prediction in play
 
@@ -30,7 +30,7 @@
 | ⬇️ DOWN target | 0.000000006126 ETH (-8.99%) |
 | 🗳️ Community vote | no votes, the code pick was used |
 | 🛤️ Path in play | ⬇️ DOWN |
-| 📈 Progress | ▰▰▰▱▱▱▱▱▱▱▱▱▱▱▱▱ 5 / 32 trades |
+| 📈 Progress | ▰▰▰▰▰▰▱▱▱▱▱▱▱▱▱▱ 11 / 32 trades |
 
 ### 🏆 Scoreboard
 
@@ -42,7 +42,7 @@
 
 | 👥 To holders | 🛠️ To development | ✅ Already claimed |
 |:---:|:---:|:---:|
-| 1.3032 ETH | 0.3579 ETH | 0.0374 ETH |
+| 1.3086 ETH | 0.3597 ETH | 0.0374 ETH |
 
 ### 📜 Latest rounds
 
